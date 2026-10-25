@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ringlista</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1d6b57">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ringlista">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#f3f5f4; --surface:#fff; --fg:#17201d; --muted:#5d6a65; --line:#dbe2df;
+  --accent:#1d6b57; --accent-fg:#fff; --accent-soft:#e1efea; --done:#8a9792; --warn:#a4501d; --rec:#c0392b;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111816; --surface:#1a2320; --fg:#e7eeeb; --muted:#9aa8a3; --line:#2b3733;
+  --accent:#5cc3a4; --accent-fg:#0b1512; --accent-soft:#1f3a32; --done:#6e7b77; --warn:#e39a68; --rec:#ff7a6b; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:center;gap:12px}
+header h1{font-size:1.8rem;margin:0;flex:1;letter-spacing:-.01em}
+.icon-btn{font:inherit;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:10px;width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
+.icon-btn svg{width:20px;height:20px}
+.icon-btn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status{font-size:.85rem;color:var(--muted)}
+.status.err{color:var(--warn)}
+.day{display:flex;flex-direction:column;gap:10px}
+.day h2{font-size:1.05rem;margin:0;display:flex;align-items:baseline;gap:8px}
+.day h2 .when{font-weight:400;font-size:.85rem;color:var(--muted)}
+.day h2 .count{font-weight:500;font-size:.8rem;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.name{font-weight:600;font-size:1.1rem;overflow-wrap:anywhere}
+.about{color:var(--muted);font-size:.92rem;overflow-wrap:anywhere}
+.num{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.95rem}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big{display:flex;align-items:center;justify-content:center;gap:8px;min-height:58px;border-radius:12px;font:inherit;font-weight:600;font-size:1.08rem;text-decoration:none;cursor:pointer;border:none;-webkit-tap-highlight-color:transparent}
+.big svg{width:22px;height:22px;flex:none}
+.call{background:var(--accent);color:var(--accent-fg)}
+.call.off{background:var(--line);color:var(--muted);pointer-events:none}
+.mic{background:var(--accent-soft);color:var(--accent)}
+.mic.on{background:var(--rec);color:#fff}
+textarea{width:100%;font:inherit;font-size:1rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:vertical;min-height:52px}
+.hint{font-size:.82rem;color:var(--accent);min-height:1.1em}
+.hint.err{color:var(--warn)}
+.row{display:flex;align-items:center;gap:10px}
+.check{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:.95rem;padding:4px 0}
+.check input{width:24px;height:24px;accent-color:var(--accent)}
+.del{margin-left:auto;font:inherit;font-size:.8rem;color:var(--muted);background:none;border:none;padding:8px;cursor:pointer}
+.del.confirm{color:var(--warn);font-weight:600}
+.card.isdone{opacity:.72}
+.card.isdone .name{text-decoration:line-through;text-decoration-color:var(--done)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:18px;color:var(--muted)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+summary{cursor:pointer;font-weight:600}
+form{display:grid;gap:10px;margin-top:12px}
+label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}
+input[type=text],input[type=tel],input[type=date],input[type=password]{font:inherit;font-size:1rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 12px;width:100%}
+.btn{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-fg);border:none;border-radius:10px;padding:12px 16px;cursor:pointer;justify-self:start}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.setup{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.setup h2{margin:0;font-size:1.2rem}
+.setup ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.setup a{color:var(--accent)}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:608px;margin:0 auto;background:var(--fg);color:var(--bg);border-radius:12px;padding:14px 16px;transform:translateY(160%);transition:transform .2s}
+.toast.show{transform:none}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Ringlista</h1>
+    <button class="icon-btn" id="refresh" aria-label="Uppdatera listan" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg></button>
+  </header>
+  <div id="status" class="status" hidden></div>
+
+  <section class="setup" id="setup" hidden>
+    <h2>Koppla listan</h2>
+    <p style="margin:0">Görs en gång. Koden låter appen läsa och spara i din privata lista på GitHub, och sparas bara i den här telefonen.</p>
+    <ol>
+      <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Öppna GitHub och skapa en ny kod</a>.</li>
+      <li>Namn: <b>Ringlista</b>. Giltighet: <b>No expiration</b> (eller ett år).</li>
+      <li>Repository access: <b>Only select repositories</b> → välj <b>Ringlista</b>.</li>
+      <li>Permissions → Repository → <b>Contents: Read and write</b>.</li>
+      <li>Tryck <b>Generate token</b>, kopiera koden och klistra in här.</li>
+    </ol>
+    <form id="tokenform">
+      <label for="token">Kod<input id="token" type="password" autocomplete="off" placeholder="github_pat_…" required></label>
+      <button class="btn" type="submit">Koppla</button>
+    </form>
+  </section>
+
+  <main id="days"></main>
+
+  <details id="addbox" hidden>
+    <summary>Lägg till samtal själv</summary>
+    <form id="addform">
+      <label for="f-name">Vem<input id="f-name" type="text" required placeholder="t.ex. Krylbo Elmontage"></label>
+      <label for="f-phone">Nummer<input id="f-phone" type="tel" placeholder="070-123 45 67"></label>
+      <label for="f-about">Ärende<input id="f-about" type="text" placeholder="Vad gäller samtalet?"></label>
+      <label for="f-date">Dag<input id="f-date" type="date"></label>
+      <button class="btn" type="submit">Lägg till</button>
+    </form>
+  </details>
+
+  <details id="historybox" hidden>
+    <summary>Klara samtal (<span id="donecount">0</span>)</summary>
+    <div class="list" id="donelist"></div>
+  </details>
+
+  <details id="settings" hidden>
+    <summary>Inställningar</summary>
+    <div style="display:grid;gap:10px;margin-top:12px">
+      <p class="status" style="margin:0">Lägg appen på hemskärmen: tryck Dela i Safari → Lägg till på hemskärmen.</p>
+      <button class="btn" type="button" id="logout" style="background:var(--line);color:var(--fg)">Byt kod</button>
+    </div>
+  </details>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const OWNER='BighitboxMarcus', REPO='Ringlista', PATH='calls.json';
+const API=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`;
+const PHONE_ICON='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>';
+const MIC_ICON='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>';
+const STOP_ICON='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+const $=id=>document.getElementById(id);
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+
+let token=null, calls=[], sha=null, recording=null, pendingRender=false;
+const drafts={}, saveTimers={};
+let queue=Promise.resolve();
+
+function getToken(){try{return localStorage.getItem('ringlista_token')}catch(e){return null}}
+function setToken(t){try{t?localStorage.setItem('ringlista_token',t):localStorage.removeItem('ringlista_token')}catch(e){}}
+function toast(m,ms=3500){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),ms)}
+function status(m,err){const s=$('status');s.hidden=!m;s.textContent=m||'';s.className='status'+(err?' err':'')}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function cleanNum(p){return String(p||'').replace(/[^\d+]/g,'')}
+function b64enc(s){const b=new TextEncoder().encode(s);let bin='';for(let i=0;i<b.length;i+=0x8000)bin+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(bin)}
+function b64dec(s){const bin=atob(s.replace(/\s/g,''));const b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return new TextDecoder().decode(b)}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function today(){return iso(new Date())}
+function addDays(s,n){const [y,m,d]=s.split('-').map(Number);return iso(new Date(y,m-1,d+n))}
+function dayLabel(s){
+  if(!s) return ['Utan dag',''];
+  const t=today(),[y,m,d]=s.split('-').map(Number);
+  const pretty=new Date(y,m-1,d).toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'});
+  if(s===t) return ['Idag',pretty];
+  if(s===addDays(t,1)) return ['Imorgon',pretty];
+  return [pretty.charAt(0).toUpperCase()+pretty.slice(1),''];
+}
+
+async function gh(method,body){
+  const r=await fetch(API+(method==='GET'?'?t='+Date.now():''),{method,headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},body:body?JSON.stringify(body):undefined,cache:'no-store'});
+  if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;throw e}
+  return r.json();
+}
+async function load(){
+  const j=await gh('GET');
+  sha=j.sha;
+  const data=JSON.parse(b64dec(j.content));
+  calls=Array.isArray(data)?data:(data.calls||[]);
+}
+/* Alla ändringar går genom en kö: hämta senaste, applicera ändringen, spara. Krockar provas om. */
+function change(fn,label){
+  queue=queue.then(async()=>{
+    for(let attempt=0;attempt<3;attempt++){
+      try{
+        await load();
+        fn(calls);
+        const j=await gh('PUT',{message:label||'Uppdatera ringlista',content:b64enc(JSON.stringify({calls},null,1)),sha});
+        sha=j.content.sha;
+        status('');
+        return true;
+      }catch(e){
+        if(e.status===409||e.status===422) continue;
+        if(e.status===401||e.status===403){status('Koden fungerar inte längre. Öppna Inställningar → Byt kod.',true);return false}
+        status('Kunde inte spara (ingen täckning?). Försöker igen när du ändrar något.',true);return false;
+      }
+    }
+    status('Kunde inte spara just nu, försök igen.',true);return false;
+  });
+  return queue;
+}
+
+function busy(){return !!recording||(document.activeElement&&document.activeElement.tagName==='TEXTAREA')}
+async function refresh(quiet){
+  const btn=$('refresh');btn.classList.add('spin');
+  try{await load();status('');if(busy())pendingRender=true;else render()}
+  catch(e){
+    if(e.status===401||e.status===403||e.status===404){if(!quiet)status('Appen når inte listan. Kontrollera att koden har tillgång till Ringlista.',true)}
+    else if(!quiet) status('Ingen kontakt med listan just nu. Visar senast hämtade.',true);
+  }
+  btn.classList.remove('spin');
+}
+
+function saveNote(it,value,hint){
+  drafts[it.id]=value;
+  clearTimeout(saveTimers[it.id]);
+  saveTimers[it.id]=setTimeout(async()=>{
+    const ok=await change(cs=>{const c=cs.find(x=>x.id===it.id);if(c)c.outcome=value},'Anteckning: '+it.name);
+    if(ok){it.outcome=value;if(drafts[it.id]===value)delete drafts[it.id];if(hint&&!recording){hint.className='hint';hint.textContent='Sparat'}}
+    else if(hint){hint.className='hint err';hint.textContent='Inte sparat än'}
+  },1500);
+}
+
+function dictate(it,ta,btn,hint){
+  if(recording){recording.stop();return}
+  const fallback=msg=>{ta.focus();hint.className='hint';hint.textContent=msg||'Tryck på mikrofonen nere till höger på tangentbordet och prata.'};
+  if(!SR) return fallback();
+  let rec;try{rec=new SR()}catch(e){return fallback()}
+  rec.lang='sv-SE';rec.continuous=true;rec.interimResults=true;
+  const base=ta.value?ta.value.replace(/\s+$/,'')+' ':'';let fin='';
+  rec.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=r[0].transcript.trim()+' ';else tmp+=r[0].transcript}ta.value=(base+fin+tmp).trim();drafts[it.id]=ta.value};
+  rec.onerror=e=>{if(['not-allowed','service-not-allowed','audio-capture'].includes(e.error))fallback('Mikrofonen är inte tillåten här – använd mikrofonen på tangentbordet.')};
+  rec.onend=()=>{recording=null;btn.classList.remove('on');btn.innerHTML=MIC_ICON+'Tala in';if(ta.value!==(it.outcome||''))saveNote(it,ta.value,hint);if(pendingRender&&!busy()){pendingRender=false;setTimeout(render,1800)}};
+  try{rec.start()}catch(e){return fallback()}
+  recording=rec;btn.classList.add('on');btn.innerHTML=STOP_ICON+'Stoppa';hint.className='hint';hint.textContent='Lyssnar… tryck Stoppa när du är klar.';
+}
+
+function card(it){
+  const el=document.createElement('div');el.className='card'+(it.done?' isdone':'');
+  const num=cleanNum(it.phone);
+  el.innerHTML=`
+    <div>
+      <div class="name">${esc(it.name)}</div>
+      ${it.about?`<div class="about">${esc(it.about)}</div>`:''}
+      <div class="num">${num?esc(it.phone):'Nummer saknas'}</div>
+    </div>
+    ${it.done?'':`<div class="actions">
+      <a class="big call${num?'':' off'}" href="${num?'tel:'+esc(num):'#'}">${PHONE_ICON}Ring</a>
+      <button type="button" class="big mic">${MIC_ICON}Tala in</button>
+    </div>`}
+    <textarea rows="3" placeholder="Vad gav samtalet?" aria-label="Anteckning ${esc(it.name)}">${esc(drafts[it.id]??it.outcome??'')}</textarea>
+    <div class="hint" aria-live="polite"></div>
+    <div class="row">
+      <label class="check"><input type="checkbox" ${it.done?'checked':''}> Klart</label>
+      <button type="button" class="del">Ta bort</button>
+    </div>`;
+  const ta=el.querySelector('textarea'),hint=el.querySelector('.hint');
+  ta.addEventListener('input',()=>{hint.textContent='';saveNote(it,ta.value,hint)});
+  const mic=el.querySelector('.mic');if(mic)mic.addEventListener('click',()=>dictate(it,ta,mic,hint));
+  el.querySelector('input[type=checkbox]').addEventListener('change',async e=>{
+    if(recording)recording.stop();
+    const v=e.target.checked,note=drafts[it.id];clearTimeout(saveTimers[it.id]);
+    const ok=await change(cs=>{const c=cs.find(x=>x.id===it.id);if(c){c.done=v;c.doneAt=v?new Date().toISOString():'';if(note!==undefined)c.outcome=note}},(v?'Klart: ':'Ej klart: ')+it.name);
+    if(ok){delete drafts[it.id];render()}else e.target.checked=!v;
+  });
+  const del=el.querySelector('.del');
+  del.addEventListener('click',async()=>{
+    if(!del.classList.contains('confirm')){del.classList.add('confirm');del.textContent='Tryck igen för att ta bort';setTimeout(()=>{del.classList.remove('confirm');del.textContent='Ta bort'},4000);return}
+    if(await change(cs=>{const i=cs.findIndex(x=>x.id===it.id);if(i>=0)cs.splice(i,1)},'Ta bort: '+it.name))render();
+  });
+  return el;
+}
+
+function render(){
+  const open=calls.filter(c=>!c.done),done=calls.filter(c=>c.done),days=$('days');
+  days.innerHTML='';
+  if(!open.length) days.innerHTML='<div class="empty"><b>Inga samtal på listan.</b><br>Be Claude lägga in samtal, eller lägg till själv nedan.</div>';
+  else{
+    const t=today(),groups=new Map();
+    open.sort((a,b)=>{const ad=a.date||'9999',bd=b.date||'9999';return ad<bd?-1:ad>bd?1:(a.order??0)-(b.order??0)});
+    for(const c of open){const k=c.date&&c.date<t?'late':(c.date?c.date+(c.slot==='kväll'?'~kväll':''):'none');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(c)}
+    const keys=[...groups.keys()].sort((a,b)=>{const r=k=>k==='late'?'0':k==='none'?'z':k;return r(a)<r(b)?-1:1});
+    for(const k of keys){
+      const list=groups.get(k),eve=k.endsWith('~kväll'),dk=k.replace('~kväll','');
+      let [lbl,sub]=k==='late'?['Försenat','']:dayLabel(dk==='none'?'':dk);
+      if(eve)lbl=lbl==='Idag'?'Ikväll':lbl+', kväll';
+      const sec=document.createElement('section');sec.className='day';
+      sec.innerHTML=`<h2>${esc(lbl)} ${sub?`<span class="when">${esc(sub)}</span>`:''}<span class="count">${list.length} st</span></h2>`;
+      list.forEach(c=>sec.appendChild(card(c)));days.appendChild(sec);
+    }
+  }
+  $('donecount').textContent=done.length;
+  const dl=$('donelist');dl.innerHTML='';
+  done.sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||'')).forEach(c=>dl.appendChild(card(c)));
+}
+
+function showApp(on){
+  $('setup').hidden=on;
+  ['refresh','addbox','historybox','settings'].forEach(id=>$(id).hidden=!on);
+  if(!on)$('days').innerHTML='';
+}
+
+$('tokenform').addEventListener('submit',async e=>{
+  e.preventDefault();
+  token=$('token').value.trim();if(!token)return;
+  status('Kopplar…');
+  try{await load();setToken(token);$('token').value='';showApp(true);status('');render();toast('Kopplat! Lägg appen på hemskärmen via Dela → Lägg till på hemskärmen.',6000)}
+  catch(err){token=null;status(err.status===404||err.status===403||err.status===401?'Koden fungerade inte. Kontrollera att den har tillgång till Ringlista med Contents: Read and write.':'Ingen kontakt just nu, försök igen.',true)}
+});
+$('addform').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const name=$('f-name').value.trim();if(!name)return;
+  const item={id:'m-'+Date.now().toString(36),name,phone:$('f-phone').value.trim(),about:$('f-about').value.trim(),date:$('f-date').value||'',order:Date.now(),done:false,outcome:'',doneAt:'',addedBy:'Marcus',createdAt:new Date().toISOString()};
+  if(await change(cs=>cs.push(item),'Nytt samtal: '+name)){e.target.reset();$('addbox').open=false;render()}
+});
+$('refresh').addEventListener('click',()=>refresh(false));
+$('logout').addEventListener('click',()=>{setToken(null);token=null;calls=[];showApp(false)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&token)refresh(true)});
+document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRender&&!busy()){pendingRender=false;render()}},60));
+
+(async()=>{
+  token=getToken();
+  if(!token){showApp(false);return}
+  showApp(true);$('days').innerHTML='<div class="empty">Hämtar listan…</div>';
+  await refresh(false);
+})();
+</script>
+</body>
+</html>
